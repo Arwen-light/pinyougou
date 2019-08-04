@@ -10,6 +10,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>pinyougou-shop-web</artifactId>
+    <packaging>war</packaging>
 
     <dependencies>
 
@@ -88,6 +89,16 @@
             <scope>provided</scope>
         </dependency>
 
+        <!-- 身份验证 -->
+        <dependency>
+            <groupId>org.springframework.security</groupId>
+            <artifactId>spring-security-web</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.security</groupId>
+            <artifactId>spring-security-config</artifactId>
+        </dependency>
+
 
     </dependencies>
 
@@ -100,7 +111,7 @@
                 <version>2.2</version>
                 <configuration>
                     <!-- 指定端口 -->
-                    <port>9101</port>
+                    <port>9103</port>
                     <!-- 请求路径 -->
                     <path>/</path>
                 </configuration>
