@@ -79,7 +79,7 @@ public class GoodsDescServiceImpl implements GoodsDescService {
 	}
 	
 	
-		@Override
+	@Override
 	public PageResult findPage(TbGoodsDesc goodsDesc, int pageNum, int pageSize) {
 		PageHelper.startPage(pageNum, pageSize);
 		
@@ -87,7 +87,7 @@ public class GoodsDescServiceImpl implements GoodsDescService {
 		Criteria criteria = example.createCriteria();
 		
 		if(goodsDesc!=null){			
-						if(goodsDesc.getIntroduction()!=null && goodsDesc.getIntroduction().length()>0){
+			if(goodsDesc.getIntroduction()!=null && goodsDesc.getIntroduction().length()>0){
 				criteria.andIntroductionLike("%"+goodsDesc.getIntroduction()+"%");
 			}
 			if(goodsDesc.getSpecificationItems()!=null && goodsDesc.getSpecificationItems().length()>0){
