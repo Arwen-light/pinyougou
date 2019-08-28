@@ -2,7 +2,10 @@ package com.pinyougou.sellergoods.service;
 import java.util.List;
 import com.pinyougou.pojo.TbItemCat;
 
+import com.pinyougou.userException.MyException;
 import entity.PageResult;
+import org.omg.CORBA.UserException;
+
 /**
  * 服务层接口
  * @author Administrator
@@ -48,7 +51,7 @@ public interface ItemCatService {
 	 * 批量删除
 	 * @param ids
 	 */
-	public void delete(Long[] ids);
+	public void delete(Long[] ids) throws MyException;
 
 	/**
 	 * 分页
@@ -57,5 +60,8 @@ public interface ItemCatService {
 	 * @return
 	 */
 	public PageResult findPage(TbItemCat itemCat, int pageNum, int pageSize);
+
+
+	List<TbItemCat> findItemCatByParentId(Long id);
 	
 }

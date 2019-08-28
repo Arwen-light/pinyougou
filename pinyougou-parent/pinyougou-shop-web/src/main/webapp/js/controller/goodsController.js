@@ -1,7 +1,7 @@
  //控制层 
-app.controller('goodsController' ,function($scope,$controller ,goodsService){
+app.controller('goodsController' ,function($scope,$controller ,goodsService,uploadService){
 	
-	$controller('baseController',{$scope:$scope});//继承
+	$controller('baseController',{$scope:$scope});//继承uploadService
 	
     //读取列表数据绑定到表单中  
 	$scope.findAll=function(){
@@ -50,6 +50,25 @@ app.controller('goodsController' ,function($scope,$controller ,goodsService){
 			}		
 		);				
 	}
+
+	// 修改一下有关增加的方法
+
+	//保存
+	$scope.add=function(){
+		$scope.entity.goodsDesc.introduction=editor.html();
+		goodsService.add( $scope.entity ).success(
+			function(response){
+				if(response.success){
+					//重新查询
+					alert("保存成功");
+					$scope.entity = { };//重新加载
+					editor.html('');//清空富文本编辑器
+				}else{
+					alert(response.message);
+				}
+			}
+		);
+	};
 	
 	 
 	//批量删除 
@@ -63,7 +82,9 @@ app.controller('goodsController' ,function($scope,$controller ,goodsService){
 				}						
 			}		
 		);				
-	}
+	};
+
+
 	
 	$scope.searchEntity={};//定义搜索对象 
 	
@@ -76,5 +97,33 @@ app.controller('goodsController' ,function($scope,$controller ,goodsService){
 			}			
 		);
 	}
-    
-});	
+
+
+	/**
+	 * 上传图片
+	 */
+	$scope.uploadFile=function(){
+		uploadService.uploadFile().success(function(response) {
+			if(response.success){//如果上传成功，取出url
+				$scope.image_entity.url=response.message;//设置文件地址
+			}else{
+				alert(response.message);
+			}
+		}).error(function() {
+			alert("上传发生错误");
+		});
+	};
+
+
+	$scope.entity={goods:{},goodsDesc:{itemImages:[]}};//定义页面实体结构
+	//添加图片列表
+	$scope.add_image_entity=function(){
+		$scope.entity.goodsDesc.itemImages.push($scope.image_entity);
+	}
+
+	//列表中移除图片
+	$scope.remove_image_entity=function(index){
+		$scope.entity.goodsDesc.itemImages.splice(index,1);
+	}
+
+});
