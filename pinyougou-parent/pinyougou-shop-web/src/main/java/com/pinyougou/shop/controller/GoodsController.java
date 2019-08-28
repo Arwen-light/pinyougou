@@ -15,117 +15,135 @@ import java.util.List;
 
 /**
  * controller
- * @author Administrator
  *
+ * @author Administrator
  */
 @RestController
 @RequestMapping("/goods")
 public class GoodsController {
 
-	@Reference
-	private GoodsService goodsService;
-	
-	/**
-	 * 返回全部列表
-	 * @return
-	 */
-	@RequestMapping("/findAll")
-	public List<TbGoods> findAll(){			
-		return goodsService.findAll();
-	}
-	
-	
-	/**
-	 * 返回全部列表
-	 * @return
-	 */
-	@RequestMapping("/findPage")
-	public PageResult  findPage(int page,int rows){			
-		return goodsService.findPage(page, rows);
-	}
-	
-	/**
-	 * 增加
-	 * @param goods
-	 * @return
-	 */
-	@RequestMapping("/add")
-	public Result add(@RequestBody Goods goods){
+    @Reference
+    private GoodsService goodsService;
 
-		// 获取登录者的名字并且注入到实体类中
-		String sellerName = SecurityContextHolder.getContext().getAuthentication().getName();
-		goods.getGoods().setSellerId(sellerName);
-
-		try {
-			goodsService.add(goods);
-			return new Result(true, "增加成功");
-		} catch (Exception e) {
-			e.printStackTrace();
-			return new Result(false, "增加失败");
-		}
-	}
-	
-	/**
-	 * 修改
-	 * @param goods
-	 * @return
-	 */
-	@RequestMapping("/update")
-	public Result update(@RequestBody TbGoods goods){
-		try {
-			goodsService.update(goods);
-			return new Result(true, "修改成功");
-		} catch (Exception e) {
-			e.printStackTrace();
-			return new Result(false, "修改失败");
-		}
-	}	
-	
-	/**
-	 * 获取实体
-	 * @param id
-	 * @return
-	 */
-	@RequestMapping("/findOne")
+    /**
+     * 返回全部列表
+     *
+     * @return
+     */
+    @RequestMapping("/findAll")
+    public List<TbGoods> findAll() {
+        return goodsService.findAll();
+    }
 
 
-	// 修改过后的findOne
-	public Goods findOne(Long id){
+    /**
+     * 返回全部列表
+     *
+     * @return
+     */
+    @RequestMapping("/findPage")
+    public PageResult findPage(int page, int rows) {
+        return goodsService.findPage(page, rows);
+    }
 
-		return goodsService.findOne(id);		
-	}
-	
-	/**
-	 * 批量删除
-	 * @param ids
-	 * @return
-	 */
-	@RequestMapping("/delete")
-	public Result delete(Long [] ids){
-		try {
-			goodsService.delete(ids);
-			return new Result(true, "删除成功"); 
-		} catch (Exception e) {
-			e.printStackTrace();
-			return new Result(false, "删除失败");
-		}
-	}
-	
-		/**
-	 * 查询+分页
-	 * @param //brand
-	 * @param page
-	 * @param rows
-	 * @return
-	 */
-	@RequestMapping("/search")
-	public PageResult search(@RequestBody TbGoods goods, int page, int rows  ){
+    /**
+     * 增加
+     *
+     * @param goods
+     * @return
+     */
+    @RequestMapping("/add")
+    public Result add(@RequestBody Goods goods) {
 
-		// 获取登录的商家的名称,进行分页精确查询
-		/*String name = SecurityContextHolder.getContext().getAuthentication().getName();
-		goods.setSellerId(name);*/
+        // 获取登录者的名字并且注入到实体类中
+        String sellerName = SecurityContextHolder.getContext().getAuthentication().getName();
+        goods.getGoods().setSellerId(sellerName);
 
-		return goodsService.findPage(goods, page, rows);		
-	}
-	
+        try {
+            goodsService.add(goods);
+            return new Result(true, "增加成功");
+        } catch (Exception e) {
+            e.printStackTrace();
+            return new Result(false, "增加失败");
+        }
+    }
+
+    /**
+     * 修改
+     *
+     * @param goods
+     * @return
+     */
+    @RequestMapping("/update")
+    public Result update(@RequestBody Goods goods) {
+
+        //校验是否是当前商家的id
+        Goods goods2 = goodsService.findOne(goods.getGoods().getId());
+        //获取当前登录的商家ID
+        String sellerId = SecurityContextHolder.getContext().getAuthentication().getName();
+        //如果传递过来的商家ID并不是当前登录的用户的ID,则属于非法操作
+        if (!goods2.getGoods().getSellerId().equals(sellerId) || !goods.getGoods().getSellerId().equals(sellerId)) {
+            return new Result(false, "非法操作");
+        }
+
+       // 业务逻辑的具体的操作内容
+        try {
+            goodsService.update(goods);
+            return new Result(true, "修改成功");
+        } catch (Exception e) {
+            e.printStackTrace();
+            return new Result(false, "修改失败");
+        }
+    }
+
+    /**
+     * 获取实体
+     *
+     * @param id
+     * @return
+     */
+    @RequestMapping("/findOne")
+
+
+    // 修改过后的findOne
+    public Goods findOne(Long id) {
+
+        return goodsService.findOne(id);
+    }
+
+    /**
+     * 批量删除
+     *
+     * @param ids
+     * @return
+     */
+    @RequestMapping("/delete")
+    public Result delete(Long[] ids) {
+        try {
+            goodsService.delete(ids);
+            return new Result(true, "删除成功");
+        } catch (Exception e) {
+            e.printStackTrace();
+            return new Result(false, "删除失败");
+        }
+    }
+
+    /**
+     * 查询+分页
+     *
+     * @param //brand
+     * @param page
+     * @param rows
+     * @return
+     */
+    @RequestMapping("/search")
+    public PageResult search(@RequestBody TbGoods goods, int page, int rows) {
+
+        // 获取登录的商家的名称,进行分页精确查询
+		String name = SecurityContextHolder.getContext().getAuthentication().getName();
+		goods.setSellerId(name);
+
+        return goodsService.findPage(goods, page, rows);
+    }
+
 }

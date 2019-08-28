@@ -78,12 +78,24 @@ public class GoodsServiceImpl implements GoodsService {
         goodsDesc.setGoodsId(goods1.getId());
         goodsDescMapper.insert(goodsDesc);
 
+        //插入SKU列表数据
+        saveItemList( goods);
+
+    }
+
+
+    /**
+     * 插入SKU列表数据
+     * @param goods
+     */
+    private void saveItemList(Goods goods){
+
         // 商品SKU列表
         if ("1".equals(goods.getGoods().getIsEnableSpec())) {
 
             List<TbItem> itemList = goods.getItemList();
             for (TbItem item : itemList) {
-            // 标题信息
+                // 标题信息
                 String title = goods.getGoods().getGoodsName();
                 Map<String, Object> specMap = JSON.parseObject(item.getSpec());
                 for (Object value : specMap.values()) {
@@ -95,20 +107,22 @@ public class GoodsServiceImpl implements GoodsService {
                 itemMapper.insert(item);
             }
         } else {
-                TbItem item = new TbItem();
-                item.setTitle(goods.getGoods().getGoodsName());//商品KPU+规格描述串作为SKU名称
-                item.setPrice(goods.getGoods().getPrice());//价格
-                item.setStatus("1");//状态
-                item.setIsDefault("1");//是否默认
-                item.setNum(99999);//库存数量
-                item.setSpec("{}");
-                setItemValue(goods, item);
-                itemMapper.insert(item);
+            TbItem item = new TbItem();
+            item.setTitle(goods.getGoods().getGoodsName());//商品KPU+规格描述串作为SKU名称
+            item.setPrice(goods.getGoods().getPrice());//价格
+            item.setStatus("1");//状态
+            item.setIsDefault("1");//是否默认
+            item.setNum(99999);//库存数量
+            item.setSpec("{}");
+            setItemValue(goods, item);   // 进行基本属性的扩展
+            itemMapper.insert(item);
         }
+
 
     }
 
-    // setItemvalue
+
+    //  设置扩展Itemvalue 基本信息---> 为了保存的完整性
     private void setItemValue(Goods goods, TbItem item) {
 
         //商品SPU编号
@@ -143,9 +157,28 @@ public class GoodsServiceImpl implements GoodsService {
      * 修改
      */
     @Override
-    public void update(TbGoods goods) {
-        goodsMapper.updateByPrimaryKey(goods);
+    public void update(Goods goods) {
+
+        // goodsMapper.updateByPrimaryKey(goods);
+        goods.getGoods().setAuditStatus("0");//设置未申请状态:如果是经过修改的商品，需要重新设置状态
+        goodsMapper.updateByPrimaryKey(goods.getGoods());//保存商品表
+        goodsDescMapper.updateByPrimaryKey(goods.getGoodsDesc());//保存商品扩展表
+
+
+        //删除原有的sku列表数据
+        TbItemExample example=new TbItemExample();
+        com.pinyougou.pojo.TbItemExample.Criteria criteria = example.createCriteria();
+        criteria.andGoodsIdEqualTo(goods.getGoods().getId());
+        itemMapper.deleteByExample(example);
+
+
+        //重新添加update 后的sku列表数据
+        saveItemList(goods);//插入商品SKU列表数据
+
     }
+
+
+
 
     /**
      * 根据ID获取实体
@@ -181,8 +214,10 @@ public class GoodsServiceImpl implements GoodsService {
      */
     @Override
     public void delete(Long[] ids) {
-        for (Long id : ids) {
-            goodsMapper.deleteByPrimaryKey(id);
+        for(Long id:ids){
+            TbGoods goods = goodsMapper.selectByPrimaryKey(id);
+            goods.setIsDelete("1");
+            goodsMapper.updateByPrimaryKey(goods);
         }
     }
 
@@ -193,6 +228,8 @@ public class GoodsServiceImpl implements GoodsService {
 
         TbGoodsExample example = new TbGoodsExample();
         Criteria criteria = example.createCriteria();
+        //非删除状态   这样的参数才允许进行在商家和运营商的品台显示
+        criteria.andIsDeleteIsNull();
 
         if (goods != null) {
             if (goods.getSellerId() != null && goods.getSellerId().length() > 0) {
@@ -224,6 +261,17 @@ public class GoodsServiceImpl implements GoodsService {
 
         Page<TbGoods> page = (Page<TbGoods>) goodsMapper.selectByExample(example);
         return new PageResult(page.getTotal(), page.getResult());
+    }
+
+    @Override
+    public void updateStatus(Long[] ids, String status) {
+
+        for(Long id:ids){
+            TbGoods goods = goodsMapper.selectByPrimaryKey(id);
+            goods.setAuditStatus(status);
+            goodsMapper.updateByPrimaryKey(goods);
+        }
+
     }
 
 }

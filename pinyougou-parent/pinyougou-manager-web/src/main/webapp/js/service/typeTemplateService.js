@@ -35,7 +35,14 @@ app.service('typeTemplateService',function($http){
 	 // 查询模板列表给item_cat 进行展示
 	this.selectTemplateOptionList=function( ){
 		return $http.post("../typeTemplate/selectTemplateOptionList.do");
+	};
+
+	/**
+	 * findSpecList
+	 * @param id
+	 * @returns {*}
+	 */
+	this.findAnnoSpecList=function(id){
+		return $http.get('../typeTemplate/findSpecList.do?id='+id);
 	}
-
-
 });

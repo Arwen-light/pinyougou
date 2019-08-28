@@ -10,7 +10,7 @@ app.controller('goodsController', function ($scope, $controller, goodsService, u
                 $scope.list = response;
             }
         );
-    }
+    };
 
     //分页
     $scope.findPage = function (page, rows) {
@@ -20,7 +20,7 @@ app.controller('goodsController', function ($scope, $controller, goodsService, u
                 $scope.paginationConf.totalItems = response.total;//更新总记录数
             }
         );
-    }
+    };
 
     //查询实体
     $scope.findOne = function () {
@@ -79,15 +79,14 @@ app.controller('goodsController', function ($scope, $controller, goodsService, u
 
     };
 
-
-
-
-
-
-    //保存
+    // 保存融合和有关的添加和修改的内容，并且进行了update 更新判断id  是否存在的功能的列表
     $scope.save = function () {
+
+        //提取文本编辑器的值
+        $scope.entity.goodsDesc.introduction = editor.html();
+
         var serviceObject;//服务层对象
-        if ($scope.entity.id != null) {//如果有ID
+        if ($scope.entity.goods.id != null) {//如果有ID  $scope.entity.goods.id!=null
             serviceObject = goodsService.update($scope.entity); //修改
         } else {
             serviceObject = goodsService.add($scope.entity);//增加
@@ -96,32 +95,17 @@ app.controller('goodsController', function ($scope, $controller, goodsService, u
             function (response) {
                 if (response.success) {
                     //重新查询
-                    $scope.reloadList();//重新加载
-                } else {
-                    alert(response.message);
-                }
-            }
-        );
-    }
-
-    // 修改一下有关增加的方法
-
-    //保存
-    $scope.add = function () {
-        $scope.entity.goodsDesc.introduction = editor.html();
-        goodsService.add($scope.entity).success(
-            function (response) {
-                if (response.success) {
-                    //重新查询
-                    alert("保存成功");
+                    alert("保存成功");  //location.href="goods.html";//跳转到商品列表页
                     $scope.entity = {};//重新加载
                     editor.html('');//清空富文本编辑器
+                    location.href="goods.html";//跳转到商品列表页
                 } else {
                     alert(response.message);
                 }
             }
         );
     };
+
 
 
     //批量删除
@@ -313,5 +297,11 @@ app.controller('goodsController', function ($scope, $controller, goodsService, u
                 }
             }
         )
+    };
+
+    $scope.directURL = function (id) {
+
+        location.href="goods_edit.html#?id="+id;
     }
+
 });
