@@ -15,6 +15,7 @@ import com.pinyougou.pojo.TbItemCatExample.Criteria;
 import com.pinyougou.sellergoods.service.ItemCatService;
 
 import entity.PageResult;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
@@ -115,6 +116,16 @@ public class ItemCatServiceImpl implements ItemCatService {
         return new PageResult(page.getTotal(), page.getResult());
     }
 
+    /**
+     * 这个是自己添加的方法，并且要进行缓存到redis 中
+     * @param id
+     * @return
+     */
+
+
+    @Autowired
+    private RedisTemplate redisTemplate;
+
     @Override
     public List<TbItemCat> findItemCatByParentId(Long id) {
 
@@ -123,8 +134,19 @@ public class ItemCatServiceImpl implements ItemCatService {
         Criteria criteria = example.createCriteria();
         criteria.andParentIdEqualTo(id);
         List<TbItemCat> tbItemCats = itemCatMapper.selectByExample(example);
-        return tbItemCats;
 
+
+
+        //每次执行查询的时候，一次性读取缓存进行存储 (因为每次增删改都要执行此方法)
+        List<TbItemCat> list = findAll();
+        for(TbItemCat itemCat:list){
+            redisTemplate.boundHashOps("itemCat").put(itemCat.getName(), itemCat.getTypeId());
+            System.out.println("更新缓存:商品分类表一个个的在存入");
+        }
+     //   System.out.println("更新缓存:商品分类表");
+
+
+        return tbItemCats;
     }
 
 }
