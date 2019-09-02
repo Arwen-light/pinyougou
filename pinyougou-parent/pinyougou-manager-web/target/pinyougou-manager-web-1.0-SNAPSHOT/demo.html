@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>AngularJs demo </title>
+    <script src="angular.min.js"></script>
+    <script>
+        var app = angular.module("myapp",[]);
+        app.controller("mycontroller",function($scope,$http){
+            $scope.findList = function () {
+                $http.get("data.json").success(
+                    function (response) {
+                        $scope.arr=response;
+                    }
+                );
+            };
+        });
+    </script>
+</head>
+
+
+<body ng-app="myapp" ng-controller="mycontroller" ng-init="findList()">
+
+<table border="1px">
+    <tr>
+        <td>姓名</td>
+        <td>年龄</td>
+        <td>地址</td>
+    </tr>
+
+    <tr ng-repeat = "a in arr">
+        <td>{{a.name}}</td>
+        <td>{{a.age}}</td>
+        <td>{{a.address}}</td>
+    </tr>
+
+</table>
+
+</body>
+</html>
