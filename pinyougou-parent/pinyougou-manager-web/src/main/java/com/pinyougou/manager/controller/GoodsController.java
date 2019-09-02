@@ -1,7 +1,10 @@
 package com.pinyougou.manager.controller;
+import java.util.Arrays;
 import java.util.List;
 
+import com.pinyougou.pojo.TbItem;
 import com.pinyougou.pojogroup.Goods;
+import com.pinyougou.search.service.ItemSearchService;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -94,6 +97,11 @@ public class GoodsController {
 	public Result delete(Long [] ids){
 		try {
 			goodsService.delete(ids);
+
+			// 删除商品的sku 以及 spu 以及solr 索引库中的商品批量信息
+			itemSearchService.deleteByGoodsIds(Arrays.asList(ids));
+
+
 			return new Result(true, "删除成功"); 
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -119,10 +127,26 @@ public class GoodsController {
 	 * @param ids
 	 * @param status
 	 */
+
+	@Reference
+	private ItemSearchService itemSearchService;
+
 	@RequestMapping("/updateStatus")
 	public Result updateStatus(Long[] ids, String status){
 		try {
 			goodsService.updateStatus(ids, status);
+			// 审核通过后.保存到solr 中
+			if(status.equals("1")){
+
+				List<TbItem> itemListByGoodsIdandStatus = goodsService.findItemListByGoodsIdandStatus(ids, status);
+				//调用搜索接口实现数据批量导入
+				if(itemListByGoodsIdandStatus.size() > 0){
+					itemSearchService.importList(itemListByGoodsIdandStatus);
+				}else{
+					System.out.println("没有明细数据");
+				}
+			}
+
 			return new Result(true, "成功");
 		} catch (Exception e) {
 			e.printStackTrace();

@@ -61,7 +61,7 @@ public class ItemToSolrText {
 
         solrTemplate.saveBeans(items);
         solrTemplate.commit();
-        System.out.println("已经成功将基本的数据和动态的数据上传到Solr中了");
+        System.out.println("已经成功将基本的数据和动态的数据和更新的时间数据上传到Solr中了");
 
     }
 

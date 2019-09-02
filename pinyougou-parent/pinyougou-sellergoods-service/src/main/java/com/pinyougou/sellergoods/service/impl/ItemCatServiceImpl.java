@@ -23,7 +23,7 @@ import org.springframework.transaction.annotation.Transactional;
  *
  * @author Administrator
  */
-@Service
+@Service(timeout = 50000)
 @Transactional
 public class ItemCatServiceImpl implements ItemCatService {
 
@@ -144,8 +144,6 @@ public class ItemCatServiceImpl implements ItemCatService {
             System.out.println("更新缓存:商品分类表一个个的在存入");
         }
      //   System.out.println("更新缓存:商品分类表");
-
-
         return tbItemCats;
     }
 
